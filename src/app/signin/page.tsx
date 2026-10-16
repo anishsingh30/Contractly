@@ -12,23 +12,19 @@ function SignInContent() {
   const searchParams = useSearchParams();
   const returnUrlParam = searchParams.get('returnUrl');
 
-  const { currentUser, isAuthLoading } = useContractly();
+  const { currentUser, isAuthLoading, logoutUser } = useContractly();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // If already authenticated, redirect to destination or dashboard
+  // If URL has ?switch=true, automatically clear previous session
   useEffect(() => {
-    if (!isAuthLoading && currentUser) {
-      let dest = '/dashboard';
-      if (returnUrlParam && returnUrlParam.startsWith('/') && !returnUrlParam.startsWith('//')) {
-        dest = returnUrlParam;
-      }
-      window.location.replace(dest);
+    if (searchParams.get('switch') === 'true' && currentUser) {
+      logoutUser();
     }
-  }, [currentUser, isAuthLoading, returnUrlParam]);
+  }, [searchParams, currentUser, logoutUser]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,63 +85,109 @@ function SignInContent() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#242321] mb-1.5">
-              Work Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="counsel@company.internal"
-              required
-              className="w-full bg-[#FCFAF5] border border-[#DED6C8] text-sm text-[#242321] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#3F4634] transition-colors"
-            />
-          </div>
-
-          <div>
-            <div className="flex justify-between items-baseline mb-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#242321]">
-                Password
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-[11px] text-[#3F4634] hover:underline"
-              >
-                Forgot password?
-              </Link>
+        {currentUser && !isAuthLoading ? (
+          <div className="space-y-4">
+            <div className="p-4 bg-[#F2ECE1] border border-[#DED6C8] rounded-[2px] text-xs">
+              <span className="text-[10px] uppercase font-mono tracking-wider text-[#6F6A61] block mb-1">
+                Active Session Detected
+              </span>
+              <p className="text-sm font-semibold text-[#242321]">{currentUser.fullName || currentUser.email}</p>
+              <p className="text-xs text-[#6F6A61] font-mono">{currentUser.email}</p>
+              <p className="text-[11px] text-[#3F4634] font-medium mt-1">
+                Role: {currentUser.role} &bull; Org: {currentUser.organizationName || 'Personal Workspace'}
+              </p>
             </div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••••••"
-              required
-              className="w-full bg-[#FCFAF5] border border-[#DED6C8] text-sm text-[#242321] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#3F4634] transition-colors"
-            />
+
+            <div className="space-y-2 pt-2">
+              <Button
+                onClick={() => {
+                  let dest = '/dashboard';
+                  if (returnUrlParam && returnUrlParam.startsWith('/') && !returnUrlParam.startsWith('//')) {
+                    dest = returnUrlParam;
+                  }
+                  window.location.replace(dest);
+                }}
+                className="w-full bg-[#3F4634] text-[#FCFAF5] hover:bg-[#59604A] text-xs py-2.5 rounded-[2px] font-semibold transition-colors"
+              >
+                Continue to Dashboard
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                onClick={async () => {
+                  setIsLoading(true);
+                  await logoutUser();
+                  setIsLoading(false);
+                }}
+                disabled={isLoading}
+                className="w-full border-[#DED6C8] text-[#242321] hover:bg-[#F2ECE1] text-xs py-2.5 rounded-[2px] font-semibold transition-colors"
+              >
+                Sign Out &amp; Switch Account
+              </Button>
+            </div>
           </div>
+        ) : (
+          <>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#242321] mb-1.5">
+                  Work Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="counsel@company.internal"
+                  required
+                  className="w-full bg-[#FCFAF5] border border-[#DED6C8] text-sm text-[#242321] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#3F4634] transition-colors"
+                />
+              </div>
 
-          <Button
-            type="submit"
-            disabled={isLoading}
-            className="w-full bg-[#3F4634] text-[#FCFAF5] hover:bg-[#59604A] text-xs py-2.5 rounded-[2px] font-semibold mt-2 transition-colors disabled:opacity-50"
-          >
-            {isLoading ? 'Signing In...' : 'Sign In to Workspace'}
-          </Button>
-        </form>
+              <div>
+                <div className="flex justify-between items-baseline mb-1.5">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-[#242321]">
+                    Password
+                  </label>
+                  <Link
+                    href="/forgot-password"
+                    className="text-[11px] text-[#3F4634] hover:underline"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  required
+                  className="w-full bg-[#FCFAF5] border border-[#DED6C8] text-sm text-[#242321] px-3 py-2 rounded-[2px] focus:outline-none focus:border-[#3F4634] transition-colors"
+                />
+              </div>
 
-        <div className="mt-6 pt-6 border-t border-[#DED6C8] text-center">
-          <p className="text-xs text-[#6F6A61]">
-            Need a Contractly workspace?{' '}
-            <Link
-              href="/signup"
-              className="text-[#3F4634] font-semibold hover:underline"
-            >
-              Create Account
-            </Link>
-          </p>
-        </div>
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-[#3F4634] text-[#FCFAF5] hover:bg-[#59604A] text-xs py-2.5 rounded-[2px] font-semibold mt-2 transition-colors disabled:opacity-50"
+              >
+                {isLoading ? 'Signing In...' : 'Sign In to Workspace'}
+              </Button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-[#DED6C8] text-center">
+              <p className="text-xs text-[#6F6A61]">
+                Need a Contractly workspace?{' '}
+                <Link
+                  href="/signup"
+                  className="text-[#3F4634] font-semibold hover:underline"
+                >
+                  Create Account
+                </Link>
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="mt-8 text-center text-xs text-[#6F6A61] space-x-4">

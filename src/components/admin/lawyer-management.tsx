@@ -207,7 +207,7 @@ export function LawyerManagement({ initialLawyers, onRefresh }: LawyerManagement
       const res = await createAdminLawyer(payload);
       setActionLoading(false);
       if (res.success) {
-        setActionFeedback({ message: `Lawyer profile for ${payload.full_name} registered successfully. Profile is pending credential review.`, type: 'success' });
+        setActionFeedback({ message: `Lawyer profile for ${payload.full_name} registered successfully. Initial account password is AdvocateWelcome123!`, type: 'success' });
         setIsAddModalOpen(false);
         onRefresh();
       } else {
@@ -623,9 +623,14 @@ export function LawyerManagement({ initialLawyers, onRefresh }: LawyerManagement
 
               {/* Private Contact Fields */}
               <div className="p-3 bg-[#F7F3EA] border border-[#DED6C8] rounded-[2px] space-y-3">
-                <span className="font-mono text-[10px] font-bold uppercase text-[#3F4634] block">
-                  🔒 Private Administrative Contact (Never Disclosed to Clients)
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] font-bold uppercase text-[#3F4634] block">
+                    🔒 Private Administrative Contact (Never Disclosed to Clients)
+                  </span>
+                  <span className="text-[10px] font-mono text-[#6F6A61]">
+                    Default Password: <code className="bg-[#EFECE3] px-1 py-0.5 rounded text-[#242321] font-bold">AdvocateWelcome123!</code>
+                  </span>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="block font-medium text-[#242321] mb-1">
