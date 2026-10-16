@@ -58,9 +58,10 @@ export type {
   HandoverChecklistItem
 };
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  (typeof window !== 'undefined' ? '/api/v1' : 'http://127.0.0.1:8000/api/v1');
+const rawBase = (process.env.NEXT_PUBLIC_API_URL || '').trim();
+const API_BASE_URL = rawBase
+  ? (rawBase.endsWith('/api/v1') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api/v1`)
+  : (typeof window !== 'undefined' ? '/api/v1' : 'http://127.0.0.1:8000/api/v1');
 
 
 let isRefreshing = false;

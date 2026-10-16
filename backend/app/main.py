@@ -56,8 +56,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include master API router
+# Include master API router with /api/v1 prefix and root fallback
 app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(api_router)
 
 @app.get("/health", tags=["Health"])
 @app.get("/healthz", tags=["Health"])
