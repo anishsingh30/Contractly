@@ -295,4 +295,6 @@ npm run build
 
 ## 13. License
 
-All rights reserved. Proprietary software. A specific open-source or commercial license will be added upon official project release.
+Copyright (c) 2026 Anish Kumar Singh. All rights reserved.
+
+This project is proprietary and confidential. The source code is made publicly visible for evaluation and review purposes only. See the [LICENSE](LICENSE) file for complete licensing terms and inquiry details.
