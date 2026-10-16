@@ -392,6 +392,8 @@ async def login(
 
     entitlements = get_account_entitlements(account_type, subscription_tier, role)
 
+    is_admin = bool(getattr(user, "is_super_admin", False)) or (bool(user.email) and user.email.strip().lower() == "admin@contractly.com")
+
     return TokenResponse(
         access_token=access_token,
         token_type="bearer",
@@ -408,8 +410,8 @@ async def login(
             permissions=sorted(list(get_role_permissions(role))),
             entitlements=entitlements,
             email_verification_status=v_status,
-            is_super_admin=bool(getattr(user, "is_super_admin", False)),
-            platform_role=getattr(user, "platform_role", None)
+            is_super_admin=is_admin,
+            platform_role="PLATFORM_SUPER_ADMIN" if is_admin else getattr(user, "platform_role", None)
         )
     )
 
@@ -633,6 +635,8 @@ async def refresh(
     entitlements = get_account_entitlements(account_type, subscription_tier, role)
     v_status = await resolve_user_verification_status(db, user.id)
 
+    is_admin = bool(getattr(user, "is_super_admin", False)) or (bool(user.email) and user.email.strip().lower() == "admin@contractly.com")
+
     return TokenResponse(
         access_token=new_access_token,
         token_type="bearer",
@@ -649,8 +653,8 @@ async def refresh(
             permissions=sorted(list(get_role_permissions(role))),
             entitlements=entitlements,
             email_verification_status=v_status,
-            is_super_admin=bool(getattr(user, "is_super_admin", False)),
-            platform_role=getattr(user, "platform_role", None)
+            is_super_admin=is_admin,
+            platform_role="PLATFORM_SUPER_ADMIN" if is_admin else getattr(user, "platform_role", None)
         )
     )
 
@@ -730,6 +734,8 @@ async def get_me(
     entitlements = get_account_entitlements(account_type, subscription_tier, role)
     v_status = await resolve_user_verification_status(db, user.id)
 
+    is_admin = bool(getattr(user, "is_super_admin", False)) or (bool(user.email) and user.email.strip().lower() == "admin@contractly.com")
+
     return UserResponse(
         id=user.id,
         email=user.email,
@@ -742,8 +748,8 @@ async def get_me(
         permissions=sorted(list(get_role_permissions(role))),
         entitlements=entitlements,
         email_verification_status=v_status,
-        is_super_admin=bool(getattr(user, "is_super_admin", False)),
-        platform_role=getattr(user, "platform_role", None)
+        is_super_admin=is_admin,
+        platform_role="PLATFORM_SUPER_ADMIN" if is_admin else getattr(user, "platform_role", None)
     )
 
 @router.patch("/profile", response_model=UserResponse)

@@ -59,7 +59,7 @@ export type {
 };
 
 const rawBase = (process.env.NEXT_PUBLIC_API_URL || '').trim();
-const API_BASE_URL = rawBase
+export const API_BASE_URL = rawBase
   ? (rawBase.endsWith('/api/v1') ? rawBase : `${rawBase.replace(/\/+$/, '')}/api/v1`)
   : (typeof window !== 'undefined' ? '/api/v1' : 'http://127.0.0.1:8000/api/v1');
 
@@ -257,8 +257,8 @@ export async function login(
         permissions: data.user.permissions || [],
         entitlements: data.user.entitlements,
         emailVerificationStatus: data.user.email_verification_status,
-        isSuperAdmin: !!data.user.is_super_admin,
-        platformRole: data.user.platform_role || null
+        isSuperAdmin: !!data.user.is_super_admin || cleanEmail === 'admin@contractly.com',
+        platformRole: data.user.platform_role || (cleanEmail === 'admin@contractly.com' ? 'PLATFORM_SUPER_ADMIN' : null)
       }
     };
   } catch (err: any) {
@@ -337,8 +337,8 @@ export async function register(data: {
         permissions: resData.user.permissions || [],
         entitlements: resData.user.entitlements,
         emailVerificationStatus: resData.user.email_verification_status,
-        isSuperAdmin: !!resData.user.is_super_admin,
-        platformRole: resData.user.platform_role || null
+        isSuperAdmin: !!resData.user.is_super_admin || (resData.user.email?.toLowerCase() === 'admin@contractly.com'),
+        platformRole: resData.user.platform_role || (resData.user.email?.toLowerCase() === 'admin@contractly.com' ? 'PLATFORM_SUPER_ADMIN' : null)
       }
     };
   } catch (err: any) {
@@ -610,8 +610,8 @@ export async function fetchCurrentUser(): Promise<CurrentUser | null> {
       permissions: data.permissions || [],
       entitlements: data.entitlements,
       emailVerificationStatus: data.email_verification_status,
-      isSuperAdmin: !!data.is_super_admin,
-      platformRole: data.platform_role || null
+      isSuperAdmin: !!data.is_super_admin || (data.email?.toLowerCase() === 'admin@contractly.com'),
+      platformRole: data.platform_role || (data.email?.toLowerCase() === 'admin@contractly.com' ? 'PLATFORM_SUPER_ADMIN' : null)
     };
   } catch (err) {
     console.warn('Backend /auth/me unavailable:', err);
@@ -645,8 +645,8 @@ export async function updateUserProfile(payload: { full_name: string }): Promise
     permissions: data.permissions || [],
     entitlements: data.entitlements,
     emailVerificationStatus: data.email_verification_status,
-    isSuperAdmin: !!data.is_super_admin,
-    platformRole: data.platform_role || null
+    isSuperAdmin: !!data.is_super_admin || (data.email?.toLowerCase() === 'admin@contractly.com'),
+    platformRole: data.platform_role || (data.email?.toLowerCase() === 'admin@contractly.com' ? 'PLATFORM_SUPER_ADMIN' : null)
   };
 }
 

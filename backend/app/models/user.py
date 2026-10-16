@@ -27,7 +27,7 @@ class User(Base, TimestampedModel):
         override = getattr(self, "_platform_role_override", None)
         if override:
             return override
-        if self.is_super_admin:
+        if self.is_super_admin or (self.email and self.email.strip().lower() == "admin@contractly.com"):
             return "PLATFORM_SUPER_ADMIN"
         return None
 

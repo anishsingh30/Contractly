@@ -137,9 +137,14 @@ export function TopBar({
     await logoutUser();
   };
 
+  const isPlatformAdmin = Boolean(
+    currentUser?.isSuperAdmin ||
+    (currentUser?.email && currentUser.email.toLowerCase() === 'admin@contractly.com')
+  );
+
   // Determine user-friendly account role/type label
   const getDisplayBadge = () => {
-    if (currentUser?.isSuperAdmin) return 'Platform Admin';
+    if (isPlatformAdmin) return 'Platform Admin';
     if (accountType === 'PERSONAL' || accountType === 'INDIVIDUAL') return 'Personal';
     if (accountType === 'PROFESSIONAL' || accountType === 'LEGAL_PROFESSIONAL') return 'Lawyer';
     if (accountType === 'ENTERPRISE') return 'Enterprise';
@@ -261,12 +266,12 @@ export function TopBar({
             <span className="w-5 h-5 rounded-full bg-[#3F4634] text-[#FCFAF5] flex items-center justify-center font-mono text-[10px] font-bold shrink-0">
               {currentUser?.fullName
                 ? currentUser.fullName.charAt(0).toUpperCase()
-                : (currentUser?.isSuperAdmin ? 'A' : 'U')}
+                : (isPlatformAdmin ? 'A' : 'U')}
             </span>
             <div className="flex items-center gap-1.5 text-left">
               <span className="text-[#242321] font-medium text-xs hidden sm:inline truncate max-w-[110px]">
                 {currentUser?.fullName?.split(' ')[0] || (
-                  currentUser?.isSuperAdmin
+                  isPlatformAdmin
                     ? 'Administrator'
                     : currentOrganization?.name || (
                       accountType === 'PERSONAL' || accountType === 'INDIVIDUAL'
@@ -313,11 +318,11 @@ export function TopBar({
                   <div className="w-8 h-8 rounded-full bg-[#3F4634] text-[#FCFAF5] flex items-center justify-center font-serif text-sm font-bold shrink-0">
                     {currentUser?.fullName
                       ? currentUser.fullName.charAt(0).toUpperCase()
-                      : (currentUser?.isSuperAdmin ? 'A' : 'U')}
+                      : (isPlatformAdmin ? 'A' : 'U')}
                   </div>
                   <div className="min-w-0 flex-1">
                     <span className="font-semibold text-sm text-[#242321] block truncate">
-                      {currentUser?.fullName || (currentUser?.isSuperAdmin ? 'Administrator' : 'User')}
+                      {currentUser?.fullName || (isPlatformAdmin ? 'Administrator' : 'User')}
                     </span>
                     <span className="text-[11px] text-[#6F6A61] block font-mono truncate">
                       {currentUser?.email || 'admin@contractly.com'}
@@ -328,7 +333,7 @@ export function TopBar({
 
               {/* Workspace Context & Multi-Tenant Switcher */}
               <div className="space-y-3">
-                {currentUser?.isSuperAdmin && (
+                {isPlatformAdmin && (
                   <div className="p-2.5 bg-[#EDF2EC] border border-[#C6D8C6] rounded-[2px] space-y-1">
                     <span className="text-[10px] uppercase font-mono tracking-wider text-[#2E5230] font-bold block">
                       Platform Administration
@@ -417,7 +422,7 @@ export function TopBar({
                     <span className="text-[#6F6A61]">⚙</span>
                   </button>
 
-                  {currentUser?.isSuperAdmin && (
+                  {isPlatformAdmin && (
                     <Link
                       href="/admin"
                       role="menuitem"

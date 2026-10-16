@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useContractly } from '@/context/contractly-context';
 import { formatRoleName } from './top-bar';
 
@@ -11,6 +12,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
+  const router = useRouter();
+  const pathname = usePathname();
   const {
     accountType,
     businessRole,
@@ -253,13 +256,20 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
                 (item.id === 'watch' && activeNav === 'watch') ||
                 (item.id === 'lawyers' && (activeNav === 'lawyers' || activeNav === 'consultations'));
 
+              const isPlatformAdmin = Boolean(
+                currentUser?.isSuperAdmin ||
+                (currentUser?.email && currentUser.email.toLowerCase() === 'admin@contractly.com')
+              );
+
               return (
                 <button
                   key={item.id}
                   onClick={() => {
-                    if (item.id === 'tasks') setActiveNav('tasks');
-                    else if (item.id === 'lawyers') setActiveNav('lawyers');
-                    else setActiveNav(item.id);
+                    const targetNav = item.id === 'tasks' ? 'tasks' : item.id === 'lawyers' ? 'lawyers' : item.id;
+                    setActiveNav(targetNav);
+                    if (pathname !== '/dashboard') {
+                      router.push('/dashboard');
+                    }
                     if (onClose) onClose();
                   }}
                   className={`w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium rounded-[2px] transition-colors text-left ${
@@ -298,7 +308,7 @@ export function Sidebar({ isOpen = false, onClose }: SidebarProps) {
             </p>
           </div>
 
-          {currentUser?.isSuperAdmin && (
+          {(currentUser?.isSuperAdmin || (currentUser?.email && currentUser.email.toLowerCase() === 'admin@contractly.com')) && (
             <div className="pt-1.5 border-t border-[#DED6C8]">
               <Link
                 href="/admin"

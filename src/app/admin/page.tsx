@@ -8,6 +8,8 @@ import {
   resetDemoWorkspace,
   getCustomerHandoverChecklist,
   fetchPlatformAdvocates,
+  fetchWithAuth,
+  API_BASE_URL,
   DemoResetPreviewResponse,
   HandoverChecklistItem
 } from '@/lib/api-client';
@@ -141,7 +143,7 @@ export default function PlatformAdminPage() {
 
     try {
       // 1. Fetch Health
-      const healthRes = await fetch('/api/v1/platform/health', {
+      const healthRes = await fetchWithAuth(`${API_BASE_URL}/platform/health`, {
         headers: { Accept: 'application/json' },
       });
 
@@ -162,25 +164,25 @@ export default function PlatformAdminPage() {
       setHealth(healthData);
 
       // 2. Fetch Metrics
-      const metricsRes = await fetch('/api/v1/platform/metrics');
+      const metricsRes = await fetchWithAuth(`${API_BASE_URL}/platform/metrics`);
       if (metricsRes.ok) {
         setMetrics(await metricsRes.json());
       }
 
       // 3. Fetch Tenants
-      const tenantsRes = await fetch('/api/v1/platform/tenants');
+      const tenantsRes = await fetchWithAuth(`${API_BASE_URL}/platform/tenants`);
       if (tenantsRes.ok) {
         setTenants(await tenantsRes.json());
       }
 
       // 4. Fetch Support Access Policy
-      const supportRes = await fetch('/api/v1/platform/support-access/status');
+      const supportRes = await fetchWithAuth(`${API_BASE_URL}/platform/support-access/status`);
       if (supportRes.ok) {
         setSupportStatus(await supportRes.json());
       }
 
       // 5. Fetch Audit Logs
-      const auditRes = await fetch('/api/v1/platform/audit-logs');
+      const auditRes = await fetchWithAuth(`${API_BASE_URL}/platform/audit-logs`);
       if (auditRes.ok) {
         setAuditLogs(await auditRes.json());
       }

@@ -60,6 +60,10 @@ export function ProfileView({ onBack }: ProfileViewProps) {
   };
 
   const isNameChanged = fullName.trim() !== (currentUser?.fullName || '');
+  const isPlatformAdmin = Boolean(
+    currentUser?.isSuperAdmin ||
+    (currentUser?.email && currentUser.email.toLowerCase() === 'admin@contractly.com')
+  );
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -92,7 +96,7 @@ export function ProfileView({ onBack }: ProfileViewProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {currentUser?.isSuperAdmin && (
+          {isPlatformAdmin && (
             <span className="font-mono text-[10px] px-2.5 py-1 bg-[#3F4634] text-[#FCFAF5] border border-[#3F4634] rounded-[2px] font-semibold">
               Platform Administrator
             </span>
@@ -134,11 +138,11 @@ export function ProfileView({ onBack }: ProfileViewProps) {
           <div className="w-14 h-14 rounded-full bg-[#3F4634] text-[#FCFAF5] flex items-center justify-center font-serif text-xl font-bold shrink-0">
             {currentUser?.fullName
               ? currentUser.fullName.charAt(0).toUpperCase()
-              : (currentUser?.isSuperAdmin ? 'A' : 'U')}
+              : (isPlatformAdmin ? 'A' : 'U')}
           </div>
           <div className="min-w-0">
             <h2 className="text-base font-semibold text-[#242321] truncate">
-              {currentUser?.fullName || (currentUser?.isSuperAdmin ? 'Administrator' : 'User')}
+              {currentUser?.fullName || (isPlatformAdmin ? 'Administrator' : 'User')}
             </h2>
             <p className="text-xs text-[#6F6A61] font-mono truncate">
               {currentUser?.email || 'admin@contractly.com'}

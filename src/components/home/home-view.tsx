@@ -40,7 +40,8 @@ export function HomeView({ onOpenContract, onRequestUpload, onNavigate }: HomeVi
   }, 0);
   const totalValue = contracts.reduce((acc, c) => acc + (c.value || 0), 0);
 
-  const greetingName = currentUser?.fullName || (currentUser?.isSuperAdmin ? 'Administrator' : 'Team Member');
+  const isPlatformAdmin = Boolean(currentUser?.isSuperAdmin || (currentUser?.email && currentUser.email.toLowerCase() === 'admin@contractly.com'));
+  const greetingName = currentUser?.fullName || (isPlatformAdmin ? 'Administrator' : 'Team Member');
   const orgName = currentOrganization?.name || 'Your Organization';
   const greetingTitle = `Good day, ${greetingName}`;
   const greetingSubtitle = `${orgName} • ${contracts.length} ${contracts.length === 1 ? 'agreement' : 'agreements'} actively managed.`;

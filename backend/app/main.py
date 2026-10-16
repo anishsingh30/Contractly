@@ -25,6 +25,14 @@ async def lifespan(app: FastAPI):
             await conn.run_sync(Base.metadata.create_all)
     else:
         logger.info("Database schema auto-creation disabled. Schema management is enforced via Alembic migrations.")
+    
+    # Synchronize primary platform admin status
+    try:
+        from sqlalchemy import text
+        async with engine.begin() as conn:
+            await conn.execute(text("UPDATE users SET is_super_admin = true WHERE lower(email) = 'admin@contractly.com'"))
+    except Exception as ex:
+        logger.warning("Could not synchronize admin@contractly.com superadmin status on startup: %s", ex)
     logger.info(
         "AI Provider diagnostic: configured=%s, model=%s, env_path=%s, env_exists=%s",
         gemini_provider.is_configured(),
