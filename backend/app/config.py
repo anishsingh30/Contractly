@@ -169,6 +169,13 @@ class Settings(BaseSettings):
                     f"CRITICAL CONFIGURATION ERROR: In {env_name} environment, a PostgreSQL database (e.g. Neon) "
                     "must be configured via DATABASE_URL or NEON_DATABASE_URL. SQLite is strictly prohibited."
                 )
+            # Seamless cloud driver normalization for asyncpg
+            if self.DATABASE_URL.startswith("postgresql://"):
+                self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+            elif self.DATABASE_URL.startswith("postgres://"):
+                self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+            if "channel_binding=" in self.DATABASE_URL:
+                self.DATABASE_URL = self.DATABASE_URL.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
             key_val = (self.SECRET_KEY or "").strip()
             if (
                 not key_val

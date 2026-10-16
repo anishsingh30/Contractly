@@ -27,9 +27,15 @@ target_metadata = Base.metadata
 def get_url() -> str:
     # Environment variable override takes strict precedence
     override_url = os.environ.get("ALEMBIC_DATABASE_URL")
-    if override_url:
-        return override_url
-    return settings.DATABASE_URL
+    url = override_url if override_url else settings.DATABASE_URL
+    if url:
+        if url.startswith("postgresql://"):
+            url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        elif url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        if "channel_binding=" in url:
+            url = url.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
+    return url
 
 
 def run_migrations_offline() -> None:
