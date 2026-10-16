@@ -1,6 +1,7 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List, Optional
+from typing import List, Optional, Union, Any
+from pydantic import field_validator
 
 # Compute canonical workspace root
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -79,11 +80,31 @@ class Settings(BaseSettings):
     S3_PRESIGNED_EXPIRATION_SECONDS: int = 900  # 15 minutes short-lived presigned link expiration
     
     # CORS
-    ALLOWED_ORIGINS: List[str] = [
+    ALLOWED_ORIGINS: Union[List[str], str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "http://localhost:8000"
     ]
+
+    @field_validator("ALLOWED_ORIGINS", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: Any) -> List[str]:
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000"]
+            if v.startswith("[") and v.endswith("]"):
+                try:
+                    import json
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return [str(item).strip() for item in parsed if str(item).strip()]
+                except Exception:
+                    pass
+            return [orig.strip() for orig in v.split(",") if orig.strip()]
+        elif isinstance(v, (list, set, tuple)):
+            return [str(item).strip() for item in v if str(item).strip()]
+        return ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:8000"]
     
     # AI / LLM Configuration
     OPENAI_API_KEY: str = ""
