@@ -91,6 +91,14 @@ export async function fetchWithAuth(input: string, init: FetchWithAuthOptions = 
     headers.set('Content-Type', 'application/json');
   }
 
+  // Dual auth: Attach Bearer token for cross-origin cloud environments
+  if (!headers.has('Authorization') && typeof window !== 'undefined') {
+    const token = localStorage.getItem('contractly_access_token');
+    if (token) {
+      headers.set('Authorization', `Bearer ${token}`);
+    }
+  }
+
   const config: RequestInit = {
     ...fetchInit,
     headers,
@@ -200,6 +208,11 @@ export async function login(
     }
 
     const data = await res.json();
+    if (data.access_token && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('contractly_access_token', data.access_token);
+      } catch {}
+    }
     return {
       success: true,
       user: {
@@ -271,6 +284,11 @@ export async function register(data: {
     }
 
     const resData = await res.json();
+    if (resData.access_token && typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('contractly_access_token', resData.access_token);
+      } catch {}
+    }
     return {
       success: true,
       user: {
@@ -330,7 +348,16 @@ export async function refreshSession(): Promise<boolean> {
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include'
     });
-    return res.ok;
+    if (res.ok) {
+      const data = await res.json().catch(() => ({}));
+      if (data.access_token && typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('contractly_access_token', data.access_token);
+        } catch {}
+      }
+      return true;
+    }
+    return false;
   } catch (err) {
     console.warn('Silent refresh error:', err);
     return false;

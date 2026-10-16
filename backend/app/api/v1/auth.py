@@ -86,13 +86,15 @@ async def resolve_user_verification_status(db: AsyncSession, user_id: str) -> st
 def set_auth_cookies(response: Response, access_token: str, refresh_token: str) -> None:
     """
     Sets secure, HttpOnly authentication cookies for browser clients.
+    Uses samesite="none" when secure=True to support cross-origin cloud deployments (e.g. Vercel + Render).
     """
+    samesite_val = "none" if settings.SECURE_COOKIES else "lax"
     # 15-minute access token cookie
     response.set_cookie(
         key=settings.ACCESS_TOKEN_COOKIE_NAME,
         value=access_token,
         httponly=True,
-        samesite="lax",
+        samesite=samesite_val,
         secure=settings.SECURE_COOKIES,
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         path="/"
@@ -102,7 +104,7 @@ def set_auth_cookies(response: Response, access_token: str, refresh_token: str) 
         key=settings.REFRESH_TOKEN_COOKIE_NAME,
         value=refresh_token,
         httponly=True,
-        samesite="lax",
+        samesite=samesite_val,
         secure=settings.SECURE_COOKIES,
         max_age=settings.REFRESH_TOKEN_EXPIRE_DAYS * 24 * 3600,
         path="/"
@@ -112,18 +114,19 @@ def clear_auth_cookies(response: Response) -> None:
     """
     Clears all authentication cookies from the client browser.
     """
+    samesite_val = "none" if settings.SECURE_COOKIES else "lax"
     response.delete_cookie(
         key=settings.ACCESS_TOKEN_COOKIE_NAME,
         path="/",
         httponly=True,
-        samesite="lax",
+        samesite=samesite_val,
         secure=settings.SECURE_COOKIES
     )
     response.delete_cookie(
         key=settings.REFRESH_TOKEN_COOKIE_NAME,
         path="/",
         httponly=True,
-        samesite="lax",
+        samesite=samesite_val,
         secure=settings.SECURE_COOKIES
     )
 
