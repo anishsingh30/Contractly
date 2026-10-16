@@ -165,6 +165,65 @@ class SMTPEmailProvider(EmailProvider):
             raw = raw.replace(self.username, "[USER]")
         return raw[:250]
 
+    def _send_via_resend_http(
+        self,
+        to_email: str,
+        subject: str,
+        html_body: str,
+        text_body: str
+    ) -> EmailDeliveryResult:
+        import urllib.request
+        import json
+
+        api_key = self.password or getattr(settings, "RESEND_API_KEY", "") or getattr(settings, "TRANSACTIONAL_EMAIL_API_KEY", "")
+        payload = {
+            "from": self.from_email,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_body,
+            "text": text_body
+        }
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "Contractly/1.0"
+            }
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                msg_id = data.get("id", f"resend-{uuid.uuid4()}")
+                logger.info(f"[ResendHTTP] Successfully delivered email to {to_email}: '{subject}' (id={msg_id})")
+                return EmailDeliveryResult(
+                    success=True,
+                    provider_message_id=msg_id,
+                    attempts=1
+                )
+        except urllib.error.HTTPError as http_err:
+            try:
+                err_body = http_err.read().decode("utf-8")
+                err_json = json.loads(err_body)
+                err_msg = err_json.get("message", err_body)
+            except Exception:
+                err_msg = str(http_err)
+            logger.error(f"[ResendHTTP] API error {http_err.code}: {err_msg}")
+            return EmailDeliveryResult(
+                success=False,
+                error_message=f"Resend HTTP delivery error ({http_err.code}): {err_msg}",
+                attempts=1
+            )
+        except Exception as exc:
+            sanitized = self._sanitize_error(exc)
+            logger.error(f"[ResendHTTP] Delivery failed: {sanitized}")
+            return EmailDeliveryResult(
+                success=False,
+                error_message=f"Resend HTTP delivery error: {sanitized}",
+                attempts=1
+            )
+
     def send_email(
         self,
         to_email: str,
@@ -178,6 +237,13 @@ class SMTPEmailProvider(EmailProvider):
                 error_message="SMTP_HOST is not configured.",
                 attempts=0
             )
+
+        # Cloud compatibility optimization:
+        # Cloud platforms (Render, AWS, Heroku) block outbound raw SMTP sockets (ports 25, 465, 587) to prevent spam.
+        # If Resend is configured (smtp.resend.com or API key starting with re_), dispatch via
+        # Resend's HTTPS REST API over port 443 which is fast, secure, and never blocked by cloud firewalls.
+        if (self.host and "resend" in self.host.lower()) or (self.password and self.password.startswith("re_")):
+            return self._send_via_resend_http(to_email, subject, html_body, text_body)
 
         msg_id = f"smtp-{uuid.uuid4()}"
         msg = MIMEMultipart("alternative")
@@ -250,7 +316,7 @@ class TransactionalEmailProvider(EmailProvider):
     Adapter for transactional HTTP email APIs (e.g. SendGrid, Resend, Postmark).
     """
     def __init__(self, api_key: Optional[str] = None, from_email: Optional[str] = None):
-        self.api_key = api_key
+        self.api_key = api_key or getattr(settings, "TRANSACTIONAL_EMAIL_API_KEY", None) or getattr(settings, "RESEND_API_KEY", None) or settings.SMTP_PASSWORD
         self.from_email = from_email or (settings.EMAIL_FROM_ADDRESS or settings.EMAIL_FROM)
 
     def send_email(
@@ -266,12 +332,53 @@ class TransactionalEmailProvider(EmailProvider):
                 error_message="Transactional email API key is not configured.",
                 attempts=0
             )
-        # Production HTTP client transmission stub
-        return EmailDeliveryResult(
-            success=False,
-            error_message="Transactional API provider is configured in standby mode.",
-            attempts=1
+
+        import urllib.request
+        import json
+        payload = {
+            "from": self.from_email,
+            "to": [to_email],
+            "subject": subject,
+            "html": html_body,
+            "text": text_body
+        }
+        req = urllib.request.Request(
+            "https://api.resend.com/emails",
+            data=json.dumps(payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "User-Agent": "Contractly/1.0"
+            }
         )
+        try:
+            with urllib.request.urlopen(req, timeout=settings.EMAIL_TIMEOUT_SECONDS) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                msg_id = data.get("id", f"resend-{uuid.uuid4()}")
+                logger.info(f"[TransactionalEmailProvider] Delivered email to {to_email}: '{subject}' (id={msg_id})")
+                return EmailDeliveryResult(
+                    success=True,
+                    provider_message_id=msg_id,
+                    attempts=1
+                )
+        except urllib.error.HTTPError as http_err:
+            try:
+                err_body = http_err.read().decode("utf-8")
+                err_json = json.loads(err_body)
+                err_msg = err_json.get("message", err_body)
+            except Exception:
+                err_msg = str(http_err)
+            return EmailDeliveryResult(
+                success=False,
+                error_message=f"Transactional API error ({http_err.code}): {err_msg}",
+                attempts=1
+            )
+        except Exception as exc:
+            return EmailDeliveryResult(
+                success=False,
+                error_message=f"Transactional API delivery error: {str(exc)[:250]}",
+                attempts=1
+            )
 
 _mock_instance: Optional[MockEmailProvider] = None
 
