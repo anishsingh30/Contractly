@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-ivory: #F7F3EA;
+  --surface-paper: #FCFAF5;
+  --text-charcoal: #242321;
+  --text-warm-gray: #6F6A61;
+  --olive-deep: #3F4634;
+  --olive-muted: #59604A;
+  --border-sand: #DED6C8;
+
+  --status-success: #4F6B50;
+  --status-success-bg: #EDF2EC;
+  --status-warning: #9A6A32;
+  --status-warning-bg: #F7EFE4;
+  --status-danger: #8B3F3F;
+  --status-danger-bg: #F7EDED;
+  --status-neutral: #6F6A61;
+  --status-neutral-bg: #EFECE3;
+}
+
+body {
+  background-color: var(--bg-ivory);
+  color: var(--text-charcoal);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar for dense enterprise tables and document panels */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F7F3EA;
+}
+::-webkit-scrollbar-thumb {
+  background: #DED6C8;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #6F6A61;
+}
+
+/* Editorial Serif for headlines */
+.editorial-title {
+  font-family: "Newsreader", "Source Serif 4", "Merriweather", Georgia, serif;
+  letter-spacing: -0.015em;
+}
+
+/* Tracked Changes / Redline Styles */
+.redline-ins {
+  background-color: #E8F0E7;
+  color: #274C25;
+  text-decoration: none;
+  border-bottom: 1.5px solid #4F6B50;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+.redline-del {
+  background-color: #F8E8E8;
+  color: #8B3F3F;
+  text-decoration: line-through;
+  opacity: 0.85;
+  padding: 1px 3px;
+  border-radius: 2px;
+}
+
+.redline-comment-highlight {
+  background-color: #F7EFE4;
+  border-bottom: 1.5px dashed #9A6A32;
+  padding: 1px 2px;
+}
+
+/* Paper document styling */
+.paper-surface {
+  background-color: #FCFAF5;
+  border: 1px solid #DED6C8;
+}
+
+/* Restrained Focus States */
+*:focus-visible {
+  outline: 2px solid #3F4634;
+  outline-offset: 1px;
+}

@@ -1,0 +1,26 @@
+# Isolated disposable PostgreSQL container for Contractly integration & migration testing
+# Usage:
+#   docker compose -f docker-compose.test.yml up -d
+#   TEST_POSTGRESQL_URL=postgresql+asyncpg://contractly:contractly_test_pw@localhost:5432/contractly_test pytest backend/tests
+#   docker compose -f docker-compose.test.yml down -v
+
+version: '3.8'
+
+services:
+  postgres_test:
+    image: postgres:16-alpine
+    container_name: contractly_postgres_test
+    environment:
+      POSTGRES_USER: contractly
+      POSTGRES_PASSWORD: contractly_test_pw
+      POSTGRES_DB: contractly_test
+    ports:
+      - "5432:5432"
+    # Mount data in memory (tmpfs) for maximum speed and zero disk footprint
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U contractly -d contractly_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 15

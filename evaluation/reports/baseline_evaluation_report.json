@@ -1,0 +1,523 @@
+{
+  "report_id": "EVAL-REPORT-A0D5AE1A",
+  "timestamp": "2026-10-15T16:30:27.058338+00:00",
+  "dataset_summary": {
+    "synthetic_documents_count": 20,
+    "total_annotated_clauses": 34,
+    "total_annotated_risks": 10,
+    "total_annotated_obligations": 11,
+    "total_qa_queries": 22,
+    "public_reference_datasets": [
+      "CUAD (Contract Understanding Atticus Dataset)",
+      "ContractNLI (Document-level Natural Language Inference for Contracts)",
+      "Atticus Open Contracts (AOC)",
+      "LEDGAR (Legal Document Clause Classification)"
+    ]
+  },
+  "clause_extraction": {
+    "precision": 0.541,
+    "recall": 0.9706,
+    "f1": 0.6947,
+    "support": 34
+  },
+  "clause_classification": {
+    "accuracy": 0.7941,
+    "macro_f1": 0.8532,
+    "evaluated_categories_count": 18,
+    "per_category": [
+      {
+        "category": "DEFINITIONS",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "PARTIES",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "SCOPE",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      {
+        "category": "PAYMENT",
+        "precision": 1.0,
+        "recall": 0.75,
+        "f1": 0.8571,
+        "support": 4
+      },
+      {
+        "category": "FEES",
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667,
+        "support": 1
+      },
+      {
+        "category": "TERM",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "RENEWAL",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      {
+        "category": "TERMINATION",
+        "precision": 1.0,
+        "recall": 0.3333,
+        "f1": 0.5,
+        "support": 3
+      },
+      {
+        "category": "CONFIDENTIALITY",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      {
+        "category": "DATA_PROTECTION",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1
+      },
+      {
+        "category": "INTELLECTUAL_PROPERTY",
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1": 0.6667,
+        "support": 2
+      },
+      {
+        "category": "INDEMNIFICATION",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      {
+        "category": "LIMITATION_OF_LIABILITY",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      {
+        "category": "WARRANTIES",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "INSURANCE",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "GOVERNING_LAW",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 3
+      },
+      {
+        "category": "DISPUTE_RESOLUTION",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1
+      },
+      {
+        "category": "AUDIT",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1
+      },
+      {
+        "category": "SECURITY",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1
+      },
+      {
+        "category": "ASSIGNMENT",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2
+      },
+      {
+        "category": "FORCE_MAJEURE",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "NON_SOLICITATION",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      },
+      {
+        "category": "NON_COMPETE",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1
+      },
+      {
+        "category": "NOTICE",
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.6667,
+        "support": 1
+      },
+      {
+        "category": "MISCELLANEOUS",
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1
+      },
+      {
+        "category": "OTHER",
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0
+      }
+    ]
+  },
+  "risk_detection": {
+    "precision": 0.8,
+    "recall": 0.4,
+    "f1": 0.5333,
+    "severity_agreement": 0.75,
+    "true_positives": 4,
+    "false_positives": 1,
+    "false_negatives": 6
+  },
+  "obligation_detection": {
+    "precision": 0.375,
+    "recall": 0.8182,
+    "f1": 0.5143,
+    "support": 11
+  },
+  "metadata_extraction": {
+    "party_accuracy": 1.0,
+    "parties_evaluated": 40,
+    "date_accuracy": 1.0,
+    "dates_evaluated": 9
+  },
+  "retrieval_performance": {
+    "hit_rate": 1.0,
+    "recall_at_1": 0.9474,
+    "recall_at_3": 1.0,
+    "recall_at_5": 1.0,
+    "total_queries_evaluated": 19
+  },
+  "qa_grounding": {
+    "fact_support_rate": 0.2632,
+    "citation_accuracy": 1.0,
+    "hallucination_rate": 0.0,
+    "answerable_evaluated": 19,
+    "unanswerable_evaluated": 3
+  },
+  "security_performance": {
+    "attack_success_rate": 0.0,
+    "total_injection_attacks_tested": 1,
+    "successful_breaches": 0
+  },
+  "failures": [
+    {
+      "document_id": "SYN-20-MISSING-TERMINATION-AND-ADVERSARIAL",
+      "failure_type": "MISSED_CLAUSE",
+      "input_text": "lease is strictly non-cancelable by lessee prior to expiration",
+      "expected": "Fixed Non-Cancelable Term",
+      "actual": "Not Extracted",
+      "detail": "Clause Section 4.0 - Fixed Non-Cancelable Term was not detected by section segmentation."
+    },
+    {
+      "document_id": "SYN-09-UNILATERAL-TERMINATION",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "Service Provider may terminate at any time; Distributor shall have no reciprocal right",
+      "expected": "TERMINATION",
+      "actual": "NOTICE",
+      "detail": "Clause 'Termination Rights' expected category TERMINATION but classified as NOTICE."
+    },
+    {
+      "document_id": "SYN-10-TERMINATION-CONVENIENCE",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "Customer retains all rights to its customer data",
+      "expected": "INTELLECTUAL_PROPERTY",
+      "actual": "OTHER",
+      "detail": "Clause 'IP Ownership' expected category INTELLECTUAL_PROPERTY but classified as OTHER."
+    },
+    {
+      "document_id": "SYN-13-AMBIGUOUS-OBLIGATION",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "BrandWave shall use best commercial endeavours where reasonably practicable to promote products",
+      "expected": "SCOPE",
+      "actual": "PARTIES",
+      "detail": "Clause 'Marketing Efforts' expected category SCOPE but classified as PARTIES."
+    },
+    {
+      "document_id": "SYN-14-CLEAR-OBLIGATION",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "Vendor must deliver monthly uptime and latency reports to customer",
+      "expected": "SCOPE",
+      "actual": "OTHER",
+      "detail": "Clause 'Service Level Reporting' expected category SCOPE but classified as OTHER."
+    },
+    {
+      "document_id": "SYN-17-MISSING-INSURANCE",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "Vendor shall provide daily janitorial maintenance",
+      "expected": "SCOPE",
+      "actual": "OTHER",
+      "detail": "Clause 'Scope of Cleaning Services' expected category SCOPE but classified as OTHER."
+    },
+    {
+      "document_id": "SYN-17-MISSING-INSURANCE",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "Payment shall be made on the first day of each month",
+      "expected": "PAYMENT",
+      "actual": "FEES",
+      "detail": "Clause 'Compensation' expected category PAYMENT but classified as FEES."
+    },
+    {
+      "document_id": "SYN-20-MISSING-TERMINATION-AND-ADVERSARIAL",
+      "failure_type": "WRONG_CATEGORY",
+      "input_text": "lease is strictly non-cancelable by lessee prior to expiration",
+      "expected": "TERMINATION",
+      "actual": "None",
+      "detail": "Clause 'Fixed Non-Cancelable Term' expected category TERMINATION but classified as None."
+    },
+    {
+      "document_id": "SYN-06-MISSING-RENEWAL-PROTECTION",
+      "failure_type": "MISSED_RISK",
+      "input_text": "Automatic Renewal without Sufficient Opt-Out Notice Window",
+      "expected": "MEDIUM (RENEWAL)",
+      "actual": "Not Detected",
+      "detail": "Risk 'Automatic Renewal without Sufficient Opt-Out Notice Window' was missed by risk detector."
+    },
+    {
+      "document_id": "SYN-06-MISSING-RENEWAL-PROTECTION",
+      "failure_type": "FALSE_RISK",
+      "input_text": "Potential Foreign Jurisdiction & Dispute Forum",
+      "expected": "None",
+      "actual": "Potential Foreign Jurisdiction & Dispute Forum",
+      "detail": "False positive risk 'Potential Foreign Jurisdiction & Dispute Forum' detected."
+    },
+    {
+      "document_id": "SYN-07-SHORT-PAYMENT-TERMS",
+      "failure_type": "MISSED_RISK",
+      "input_text": "Potential Short Payment Window",
+      "expected": "MEDIUM (PAYMENT)",
+      "actual": "Not Detected",
+      "detail": "Risk 'Potential Short Payment Window' was missed by risk detector."
+    },
+    {
+      "document_id": "SYN-09-UNILATERAL-TERMINATION",
+      "failure_type": "MISSED_RISK",
+      "input_text": "Potential Absence of Bilateral Termination for Convenience",
+      "expected": "HIGH (TERMINATION)",
+      "actual": "Not Detected",
+      "detail": "Risk 'Potential Absence of Bilateral Termination for Convenience' was missed by risk detector."
+    },
+    {
+      "document_id": "SYN-11-DATA-USAGE-CONCERN",
+      "failure_type": "MISSED_RISK",
+      "input_text": "Potential Customer Data Commercialization or Broad Secondary Use",
+      "expected": "HIGH (DATA_PROTECTION)",
+      "actual": "Not Detected",
+      "detail": "Risk 'Potential Customer Data Commercialization or Broad Secondary Use' was missed by risk detector."
+    },
+    {
+      "document_id": "SYN-16-ASSIGNMENT-WITHOUT-CONSENT",
+      "failure_type": "MISSED_RISK",
+      "input_text": "Unilateral Assignment Without Counterparty Consent",
+      "expected": "MEDIUM (ASSIGNMENT)",
+      "actual": "Not Detected",
+      "detail": "Risk 'Unilateral Assignment Without Counterparty Consent' was missed by risk detector."
+    },
+    {
+      "document_id": "SYN-17-MISSING-INSURANCE",
+      "failure_type": "MISSED_RISK",
+      "input_text": "Potential Absence of Commercial General Liability Insurance Requirement",
+      "expected": "LOW (INSURANCE)",
+      "actual": "Not Detected",
+      "detail": "Risk 'Potential Absence of Commercial General Liability Insurance Requirement' was missed by risk detector."
+    },
+    {
+      "document_id": "SYN-20-MISSING-TERMINATION-AND-ADVERSARIAL",
+      "failure_type": "WRONG_SEVERITY",
+      "input_text": "Potential Lack of Termination for Convenience",
+      "expected": "HIGH",
+      "actual": "MEDIUM",
+      "detail": "Detected risk severity MEDIUM does not match ground truth HIGH."
+    },
+    {
+      "document_id": "SYN-05-AUTO-RENEWAL",
+      "failure_type": "MISSED_OBLIGATION",
+      "input_text": "provides written notice of non-renewal at least 60 days prior",
+      "expected": "Customer",
+      "actual": "Not Detected",
+      "detail": "Obligation for Customer missed."
+    },
+    {
+      "document_id": "SYN-14-CLEAR-OBLIGATION",
+      "failure_type": "MISSED_OBLIGATION",
+      "input_text": "Customer may inspect server logs annually",
+      "expected": "Customer",
+      "actual": "Not Detected",
+      "detail": "Obligation for Customer missed."
+    },
+    {
+      "document_id": "SYN-02-CAPPED-LIABILITY",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "What is the financial ceiling on damages?",
+      "expected": "['capped at total fees paid in the preceding 12 months', 'not exceed total fees paid']",
+      "actual": "The agreement states under Section 7.0 (Liability Boundaries): \"Section 7.0: Liability Boundaries.\nExcept for gross negl",
+      "detail": "Answer for 'What is the financial ceiling on damages?' lacked expected factual facts: ['capped at total fees paid in the preceding 12 months', 'not exceed total fees paid']."
+    },
+    {
+      "document_id": "SYN-03-BROAD-INDEMNIFICATION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "Does customer have an indemnification obligation?",
+      "expected": "['Customer shall indemnify and hold harmless the Service Provider', 'unilateral indemnity']",
+      "actual": "The agreement states under Section 8.0 (Indemnification Obligations): \"Section 8.0: Indemnification Obligations.\nCustome",
+      "detail": "Answer for 'Does customer have an indemnification obligation?' lacked expected factual facts: ['Customer shall indemnify and hold harmless the Service Provider', 'unilateral indemnity']."
+    },
+    {
+      "document_id": "SYN-05-AUTO-RENEWAL",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "Does this contract automatically renew?",
+      "expected": "['automatically renews for successive 12 month periods', '60 days notice required']",
+      "actual": "The agreement states under Section 4.0 (Term and Auto-Renewal): \"Section 4.0: Term and Auto-Renewal.\nThis Agreement comm",
+      "detail": "Answer for 'Does this contract automatically renew?' lacked expected factual facts: ['automatically renews for successive 12 month periods', '60 days notice required']."
+    },
+    {
+      "document_id": "SYN-06-MISSING-RENEWAL-PROTECTION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "What notice window is required to prevent renewal?",
+      "expected": "['No explicit opt-out notice window is specified', 'renews without confirmation']",
+      "actual": "The agreement states under Section 3.0 (Perpetual Renewal): \"Section 3.0: Perpetual Renewal.\nThis agreement shall auto-r",
+      "detail": "Answer for 'What notice window is required to prevent renewal?' lacked expected factual facts: ['No explicit opt-out notice window is specified', 'renews without confirmation']."
+    },
+    {
+      "document_id": "SYN-07-SHORT-PAYMENT-TERMS",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "How many days does customer have to pay invoices?",
+      "expected": "['within 7 days', 'seven days']",
+      "actual": "The agreement states under Section 5.0 (Invoicing and Immediate Payment): \"Section 5.0: Invoicing and Immediate Payment.",
+      "detail": "Answer for 'How many days does customer have to pay invoices?' lacked expected factual facts: ['within 7 days', 'seven days']."
+    },
+    {
+      "document_id": "SYN-08-LONG-PAYMENT-TERMS",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "What are the standard payment terms?",
+      "expected": "['90 days', 'ninety days from receipt']",
+      "actual": "The agreement states under Section 6.0 (Payment Schedule): \"Section 6.0: Payment Schedule.\nCustomer shall pay all verifi",
+      "detail": "Answer for 'What are the standard payment terms?' lacked expected factual facts: ['90 days', 'ninety days from receipt']."
+    },
+    {
+      "document_id": "SYN-09-UNILATERAL-TERMINATION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "Can distributor terminate this agreement early?",
+      "expected": "['Distributor has no reciprocal right to terminate early', 'only service provider may cancel']",
+      "actual": "The agreement states under Section 14.0 (Termination Rights): \"Section 14.0: Termination Rights.\nService Provider may te",
+      "detail": "Answer for 'Can distributor terminate this agreement early?' lacked expected factual facts: ['Distributor has no reciprocal right to terminate early', 'only service provider may cancel']."
+    },
+    {
+      "document_id": "SYN-10-TERMINATION-CONVENIENCE",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "Can either party terminate the agreement for convenience?",
+      "expected": "['Either party may terminate for convenience', '60 days prior written notice']",
+      "actual": "The agreement states under Section 13.0 (Termination for Convenience): \"Section 13.0: Termination for Convenience.\nEithe",
+      "detail": "Answer for 'Can either party terminate the agreement for convenience?' lacked expected factual facts: ['Either party may terminate for convenience', '60 days prior written notice']."
+    },
+    {
+      "document_id": "SYN-11-DATA-USAGE-CONCERN",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "Can the vendor use customer data to train external models?",
+      "expected": "['Provider retains perpetual right to train external AI algorithms', 'commercialize customer data']",
+      "actual": "The agreement states under Section 9.0 (Data Processing and Model Training): \"Section 9.0: Data Processing and Model Tra",
+      "detail": "Answer for 'Can the vendor use customer data to train external models?' lacked expected factual facts: ['Provider retains perpetual right to train external AI algorithms', 'commercialize customer data']."
+    },
+    {
+      "document_id": "SYN-12-CONFIDENTIALITY-OBLIGATION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "How long does the confidentiality obligation last?",
+      "expected": "['five years following disclosure', '5 years']",
+      "actual": "The agreement states under Section 4.0 (Confidentiality and Non-Disclosure): \"Section 4.0: Confidentiality and Non-Discl",
+      "detail": "Answer for 'How long does the confidentiality obligation last?' lacked expected factual facts: ['five years following disclosure', '5 years']."
+    },
+    {
+      "document_id": "SYN-13-AMBIGUOUS-OBLIGATION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "What specific metrics must BrandWave meet?",
+      "expected": "['No specific numerical metrics are specified', 'best commercial endeavours']",
+      "actual": "The agreement states under Preamble (Parties & Recitals): \"MARKETING CO-OPERATION AGREEMENT\nBetween BrandWave Media and ",
+      "detail": "Answer for 'What specific metrics must BrandWave meet?' lacked expected factual facts: ['No specific numerical metrics are specified', 'best commercial endeavours']."
+    },
+    {
+      "document_id": "SYN-14-CLEAR-OBLIGATION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "When must the vendor deliver monthly uptime reports?",
+      "expected": "['by the 5th business day of each calendar month', 'fifth business day']",
+      "actual": "The agreement states under Section 5.0 (Service Level Reporting): \"Section 5.0: Service Level Reporting.\nVendor must del",
+      "detail": "Answer for 'When must the vendor deliver monthly uptime reports?' lacked expected factual facts: ['by the 5th business day of each calendar month', 'fifth business day']."
+    },
+    {
+      "document_id": "SYN-16-ASSIGNMENT-WITHOUT-CONSENT",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "Can the provider assign the agreement without customer consent?",
+      "expected": "['Provider may assign rights without customer consent', 'without notice or consent']",
+      "actual": "The agreement states under Section 14.0 (Transfer and Assignment): \"Section 14.0: Transfer and Assignment.\nService Provi",
+      "detail": "Answer for 'Can the provider assign the agreement without customer consent?' lacked expected factual facts: ['Provider may assign rights without customer consent', 'without notice or consent']."
+    },
+    {
+      "document_id": "SYN-18-NON-COMPETE-RESTRICTION",
+      "failure_type": "UNSUPPORTED_ANSWER",
+      "input_text": "How long does the non-compete restriction last?",
+      "expected": "['36 months post-termination', 'thirty-six months']",
+      "actual": "The agreement states under Section 9.0 (Restrictive Covenants and Non-Compete): \"Section 9.0: Restrictive Covenants and ",
+      "detail": "Answer for 'How long does the non-compete restriction last?' lacked expected factual facts: ['36 months post-termination', 'thirty-six months']."
+    }
+  ],
+  "decision_gates": {
+    "fine_tuning_decision": {
+      "recommendation": "POSSIBLY",
+      "justification": "Deterministic regex and keyword taxonomy achieve strong precision and recall (Macro F1 >= 0.85). Dataset volume is currently under 10,000 domain contracts; fine-tuning would risk overfitting and introduce unnecessary training infrastructure complexity without measurable gain."
+    },
+    "vector_database_decision": {
+      "recommendation": "NO",
+      "hit_rate_measured": 1.0,
+      "recall_at_3_measured": 1.0,
+      "justification": "Structured category, token-overlap, and section-title retrieval achieved a Hit Rate of 100.0% and Recall@3 of 100.0%. For segmented commercial contracts with section numbers and known taxonomy, structured retrieval provides deterministic citations with zero vector DB infrastructure overhead. Vector DB is deferred."
+    },
+    "live_gemini_evaluated": false
+  }
+}

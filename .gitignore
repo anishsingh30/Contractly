@@ -1,0 +1,64 @@
+# Environment files and secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+!.env.staging.example
+
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build and caches
+.next/
+out/
+build/
+dist/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+*$py.class
+*.tsbuildinfo
+.vercel/
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Databases (Local canonical, test DBs, and SQLite journals)
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+contractly.db*
+
+# Local storage and private uploads
+backend/storage/uploads/
+storage/uploads/
+
+# Backups, dumps, temporary scripts, and artifacts
+backups/
+*.backup
+*.dump
+*.bak
+*.bak*
+*.bak_*
+scratch/
+1.13.0
+backend/backend/
+storage_migration_manifest_*.json
+
+# OS and log artifacts
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db

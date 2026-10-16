@@ -1,0 +1,24 @@
+MASTER SERVICES AGREEMENT
+
+This Master Services Agreement ("Agreement") is entered into as of October 10, 2026, by and between Northstar Technologies Pvt. Ltd. ("Customer") and Apex Data Analytics Inc. ("Service Provider").
+
+SECTION 1. DEFINITIONS AND SCOPE OF SERVICES
+Service Provider shall provide AI-driven data analytics and model inference infrastructure as specified in each Statement of Work ("SOW").
+
+SECTION 2. TERM AND TERMINATION FOR CONVENIENCE
+This Agreement shall commence on the Effective Date and remain in effect for two (2) years. Either party may terminate this Agreement for convenience upon providing at least thirty (30) days written notice to the other party.
+
+SECTION 3. CONFIDENTIALITY AND DATA PROTECTION
+Each party agrees to safeguard all Confidential Information of the other party using the same degree of care it uses for its own confidential materials, but no less than reasonable care. Service Provider shall comply with all applicable data protection laws including the Digital Personal Data Protection Act (DPDPA).
+
+SECTION 4. INTELLECTUAL PROPERTY INDEMNIFICATION
+Service Provider shall defend, indemnify, and hold harmless Customer from and against any third-party claims alleging that the Services infringe any patent, copyright, or trademark.
+
+SECTION 5. LIMITATION OF LIABILITY
+EXCEPT FOR WILLFUL MISCONDUCT OR BREACHES OF CONFIDENTIALITY, NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES. EACH PARTY'S TOTAL AGGREGATE LIABILITY UNDER THIS AGREEMENT SHALL BE LIMITED TO THE TOTAL FEES PAID OR PAYABLE BY CUSTOMER IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.
+
+SECTION 6. RESTRICTIVE COVENANTS AND NON-COMPETE
+During the term of this Agreement and for a period of twelve (12) months thereafter, Customer personnel shall not directly engage in competing commercial activities within the territory of India.
+
+SECTION 7. GOVERNING LAW AND JURISDICTION
+This Agreement shall be governed by and construed in accordance with the laws of Karnataka, India.

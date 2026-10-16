@@ -1,0 +1,13 @@
+# Exclude backend and server-side assets from Vercel frontend deployment
+backend/
+contractly.db*
+*.bak*
+*.sqlite*
+evaluation/
+scratch/
+docs/
+*.md
+*.vbs
+sample_msa.*
+docker-compose.test.yml
+pytest.ini
