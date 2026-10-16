@@ -170,12 +170,17 @@ class Settings(BaseSettings):
                     "must be configured via DATABASE_URL or NEON_DATABASE_URL. SQLite is strictly prohibited."
                 )
             # Seamless cloud driver normalization for asyncpg
+            import re
             if self.DATABASE_URL.startswith("postgresql://"):
                 self.DATABASE_URL = self.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
             elif self.DATABASE_URL.startswith("postgres://"):
                 self.DATABASE_URL = self.DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+            if "sslmode=" in self.DATABASE_URL:
+                self.DATABASE_URL = self.DATABASE_URL.replace("sslmode=", "ssl=")
             if "channel_binding=" in self.DATABASE_URL:
-                self.DATABASE_URL = self.DATABASE_URL.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
+                self.DATABASE_URL = re.sub(r'[?&]channel_binding=[^&]+', '', self.DATABASE_URL)
+                if '?' not in self.DATABASE_URL and '&' in self.DATABASE_URL:
+                    self.DATABASE_URL = self.DATABASE_URL.replace('&', '?', 1)
             key_val = (self.SECRET_KEY or "").strip()
             if (
                 not key_val

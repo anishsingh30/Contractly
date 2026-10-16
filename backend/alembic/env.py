@@ -26,6 +26,7 @@ target_metadata = Base.metadata
 
 def get_url() -> str:
     # Environment variable override takes strict precedence
+    import re
     override_url = os.environ.get("ALEMBIC_DATABASE_URL")
     url = override_url if override_url else settings.DATABASE_URL
     if url:
@@ -33,8 +34,12 @@ def get_url() -> str:
             url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
         elif url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql+asyncpg://", 1)
+        if "sslmode=" in url:
+            url = url.replace("sslmode=", "ssl=")
         if "channel_binding=" in url:
-            url = url.replace("&channel_binding=require", "").replace("channel_binding=require&", "").replace("?channel_binding=require", "")
+            url = re.sub(r'[?&]channel_binding=[^&]+', '', url)
+            if '?' not in url and '&' in url:
+                url = url.replace('&', '?', 1)
     return url
 
 
