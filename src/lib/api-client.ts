@@ -67,6 +67,20 @@ const API_BASE_URL = rawBase
 let isRefreshing = false;
 let refreshSubscribers: ((success: boolean) => void)[] = [];
 
+export function syncAuthCookies(accessToken?: string, refreshToken?: string): void {
+  if (typeof document === 'undefined') return;
+  try {
+    const isSecure = typeof window !== 'undefined' && window.location.protocol === 'https:';
+    const secureFlag = isSecure ? '; Secure' : '';
+    if (accessToken) {
+      document.cookie = `contractly_access_token=${accessToken}; path=/; max-age=900; SameSite=Lax${secureFlag}`;
+    }
+    if (refreshToken) {
+      document.cookie = `contractly_refresh_token=${refreshToken}; path=/; max-age=604800; SameSite=Lax${secureFlag}`;
+    }
+  } catch {}
+}
+
 function onRefreshed(success: boolean) {
   refreshSubscribers.forEach((callback) => callback(success));
   refreshSubscribers = [];
@@ -122,7 +136,13 @@ export async function fetchWithAuth(input: string, init: FetchWithAuthOptions = 
       }
 
       if (refreshSuccess) {
-        // Retry the original request once with new cookies
+        // Retry the original request once with new token
+        if (typeof window !== 'undefined') {
+          const newToken = localStorage.getItem('contractly_access_token');
+          if (newToken) {
+            headers.set('Authorization', `Bearer ${newToken}`);
+          }
+        }
         return fetch(input, config);
       } else {
         if (!skipRedirect && typeof window !== 'undefined') {
@@ -158,6 +178,12 @@ export async function fetchWithAuth(input: string, init: FetchWithAuthOptions = 
         addRefreshSubscriber(async (success) => {
           if (success) {
             try {
+              if (typeof window !== 'undefined') {
+                const newToken = localStorage.getItem('contractly_access_token');
+                if (newToken) {
+                  headers.set('Authorization', `Bearer ${newToken}`);
+                }
+              }
               resolve(await fetch(input, config));
             } catch {
               resolve(res);
@@ -211,7 +237,11 @@ export async function login(
     if (data.access_token && typeof window !== 'undefined') {
       try {
         localStorage.setItem('contractly_access_token', data.access_token);
+        if (data.refresh_token) {
+          localStorage.setItem('contractly_refresh_token', data.refresh_token);
+        }
       } catch {}
+      syncAuthCookies(data.access_token, data.refresh_token);
     }
     return {
       success: true,
@@ -287,7 +317,11 @@ export async function register(data: {
     if (resData.access_token && typeof window !== 'undefined') {
       try {
         localStorage.setItem('contractly_access_token', resData.access_token);
+        if (resData.refresh_token) {
+          localStorage.setItem('contractly_refresh_token', resData.refresh_token);
+        }
       } catch {}
+      syncAuthCookies(resData.access_token, resData.refresh_token);
     }
     return {
       success: true,
@@ -324,13 +358,14 @@ export async function logout(): Promise<void> {
   } finally {
     // Defense-in-depth: Clear client-side accessible auth cookies
     if (typeof document !== 'undefined') {
-      document.cookie = 'contractly_access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
-      document.cookie = 'contractly_refresh_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT;';
+      document.cookie = 'contractly_access_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
+      document.cookie = 'contractly_refresh_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Lax';
     }
     // Clear any local or session storage
     if (typeof window !== 'undefined') {
       try {
-        localStorage.clear();
+        localStorage.removeItem('contractly_access_token');
+        localStorage.removeItem('contractly_refresh_token');
         sessionStorage.clear();
       } catch {
         // Ignore potential private-mode security restrictions
@@ -343,9 +378,12 @@ export async function logout(): Promise<void> {
 
 export async function refreshSession(): Promise<boolean> {
   try {
+    const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('contractly_refresh_token') : null;
+    const bodyPayload = refreshToken ? JSON.stringify({ refresh_token: refreshToken }) : undefined;
     const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body: bodyPayload,
       credentials: 'include'
     });
     if (res.ok) {
@@ -353,7 +391,11 @@ export async function refreshSession(): Promise<boolean> {
       if (data.access_token && typeof window !== 'undefined') {
         try {
           localStorage.setItem('contractly_access_token', data.access_token);
+          if (data.refresh_token) {
+            localStorage.setItem('contractly_refresh_token', data.refresh_token);
+          }
         } catch {}
+        syncAuthCookies(data.access_token, data.refresh_token);
       }
       return true;
     }

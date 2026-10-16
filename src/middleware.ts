@@ -80,38 +80,18 @@ export function middleware(request: NextRequest) {
   if (isAuthRoute) {
     const hasReturnUrl = request.nextUrl.searchParams.has('returnUrl');
 
-    // If redirected to sign-in with returnUrl, NEVER bounce to dashboard!
-    // Stale cookies led to this redirect; clear them to break loops and display the form.
-    if (hasReturnUrl) {
-      const response = NextResponse.next();
-      if (hasAccessToken) response.cookies.delete('contractly_access_token');
-      if (hasRefreshToken) response.cookies.delete('contractly_refresh_token');
-      return response;
-    }
-
-    // Only redirect to dashboard if the access token is genuinely VALID and UNEXPIRED
-    if (hasAccessToken && !isAccessExpired) {
+    // Only redirect to dashboard if the user has an explicit, valid, UNEXPIRED token
+    // and did NOT arrive with a returnUrl parameter (which indicates an explicit sign-in request).
+    if (hasAccessToken && !isAccessExpired && !hasReturnUrl) {
       const dashboardUrl = new URL('/dashboard', request.url);
       return NextResponse.redirect(dashboardUrl);
     }
 
-    // If access token is expired, clean it up and allow the sign-in / sign-up page to render
+    // If access token is expired, clean it up from cookies
     const response = NextResponse.next();
     if (hasAccessToken && isAccessExpired) {
       response.cookies.delete('contractly_access_token');
     }
-    return response;
-  }
-
-  // Unauthenticated user attempting to access protected dashboard routes
-  if (!hasPotentialSession && !isPublicRoute) {
-    const signinUrl = new URL('/signin', request.url);
-    if (cleanPath && cleanPath !== '/') {
-      signinUrl.searchParams.set('returnUrl', cleanPath);
-    }
-    const response = NextResponse.redirect(signinUrl);
-    if (hasAccessToken) response.cookies.delete('contractly_access_token');
-    if (hasRefreshToken) response.cookies.delete('contractly_refresh_token');
     return response;
   }
 

@@ -47,8 +47,8 @@ function SignInContent() {
         if (returnUrlParam && returnUrlParam.startsWith('/') && !returnUrlParam.startsWith('//')) {
           dest = returnUrlParam;
         }
-        // Force full page navigation to ensure browser registers newly set HttpOnly session cookies
-        window.location.href = dest;
+        // Force full page navigation to ensure browser registers newly set session cookies and state
+        window.location.replace(dest);
       } else {
         setError(res.error || 'Invalid credentials. Please verify your email and password.');
       }
