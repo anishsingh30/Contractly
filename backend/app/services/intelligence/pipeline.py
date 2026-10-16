@@ -10,6 +10,7 @@ from app.services.intelligence.normalizer import normalize_contract_text
 from app.services.intelligence.section_detector import detect_sections
 from app.services.intelligence.clause_extractor import extract_clauses
 from app.services.intelligence.metadata_extractor import extract_parties, extract_candidate_dates, detect_renewal_metadata
+from app.services.intelligence.financial_extractor import extract_contract_financials
 from app.services.intelligence.obligation_detector import extract_obligation_candidates
 from app.services.intelligence.risk_detector import detect_contract_risks, compute_explainable_risk_score
 
@@ -79,6 +80,33 @@ async def run_intelligence_pipeline(
             contract.renewal_notice_days = renewal_meta["renewal_notice_days"]
         if renewal_meta.get("termination_notice_days"):
             contract.termination_notice_days = renewal_meta["termination_notice_days"]
+
+        # Step 5b: Extract Committed Financial Metadata
+        financial_meta = extract_contract_financials(
+            normalized_text,
+            clauses=extracted_clauses,
+            candidate_dates=candidate_dates,
+            contract_start_date=contract.start_date,
+            contract_expiry_date=contract.expiry_date
+        )
+        if financial_meta["is_verified"]:
+            contract.value = financial_meta["value"]
+            contract.currency = financial_meta["currency"]
+            if hasattr(contract, "value_basis"):
+                contract.value_basis = financial_meta["value_basis"]
+            if hasattr(contract, "calculation_explanation"):
+                contract.calculation_explanation = financial_meta["calculation_explanation"]
+        elif contract.value in (None, 0, 0.0):
+            contract.value = financial_meta["value"]
+            contract.currency = financial_meta["currency"]
+            if hasattr(contract, "value_basis"):
+                contract.value_basis = financial_meta["value_basis"]
+            if hasattr(contract, "calculation_explanation"):
+                contract.calculation_explanation = financial_meta["calculation_explanation"]
+        else:
+            if hasattr(contract, "value_basis") and (not contract.value_basis or contract.value_basis == "NOT_SPECIFIED"):
+                contract.value_basis = "MANUALLY_ENTERED"
+                contract.calculation_explanation = f"Manual contract value of {contract.currency} {float(contract.value):,.0f}"
 
         # Step 6: Extract Obligations
         obligation_candidates = extract_obligation_candidates(extracted_clauses)
@@ -198,7 +226,8 @@ async def run_intelligence_pipeline(
             "obligations_count": len(obligation_candidates),
             "parties": parties,
             "candidate_dates": candidate_dates,
-            "risk_score_breakdown": score_info
+            "risk_score_breakdown": score_info,
+            "financials": financial_meta
         }
 
     except Exception as exc:

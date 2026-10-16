@@ -4,6 +4,7 @@ import React from 'react';
 import { useContractly } from '@/context/contractly-context';
 import { StatusPill } from '@/components/ui/status-pill';
 import { Button } from '@/components/ui/button';
+import { calculateCommittedTotals, formatCurrency } from '@/lib/currency-formatter';
 
 interface OverviewDashboardProps {
   onOpenContract: (id: string) => void;
@@ -18,10 +19,13 @@ export function OverviewDashboard({
 }: OverviewDashboardProps) {
   const { contracts, obligations, accountType } = useContractly();
 
-  const totalValue = contracts.reduce((acc, c) => acc + c.value, 0);
+  const committedTotals = calculateCommittedTotals(contracts);
   const activeCount = contracts.filter((c) => c.status === 'ACTIVE').length;
   const underReviewCount = contracts.filter((c) => c.status === 'UNDER_REVIEW' || c.status === 'NEGOTIATION').length;
-  const pendingApprovalsCount = contracts.filter((c) => c.status === 'PENDING_APPROVAL').length;
+  const pendingApprovalsCount = contracts.reduce(
+    (acc, c) => acc + (c.approvalSteps || []).filter((s) => s.decision === 'PENDING').length,
+    0
+  );
   const attentionCount = contracts.filter((c) => c.riskLevel === 'HIGH' || c.riskLevel === 'CRITICAL').length;
 
   // Real upcoming obligations and deadlines
@@ -76,14 +80,6 @@ export function OverviewDashboard({
     });
   }
 
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val);
-  };
-
   return (
     <div className="space-y-6">
       {/* Top Banner (Instruction 1 & 23) */}
@@ -122,9 +118,15 @@ export function OverviewDashboard({
               Committed Value
             </span>
             <div className="text-xl font-mono font-bold text-[#242321] mt-1">
-              {formatCurrency(totalValue)}
+              {committedTotals.primaryFormatted}
             </div>
-            <p className="text-[11px] text-[#6F6A61] mt-1">Across active agreements</p>
+            <p className="text-[11px] text-[#6F6A61] mt-1">
+              {committedTotals.secondaryFormatted
+                ? `+ ${committedTotals.secondaryFormatted} • Across ${committedTotals.activeEligibleCount} active agreements`
+                : committedTotals.activeEligibleCount > 0
+                ? `Across ${committedTotals.activeEligibleCount} active agreements`
+                : 'Across active agreements'}
+            </p>
           </div>
         ) : (
           <div className="p-4 bg-[#FCFAF5] border border-[#DED6C8] rounded-[2px]">

@@ -6,6 +6,7 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { Button } from '@/components/ui/button';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { formatRoleName } from '@/components/navigation/top-bar';
+import { formatContractValue } from '@/lib/currency-formatter';
 
 interface ContractTableProps {
   onOpenContract: (id: string) => void;
@@ -30,14 +31,6 @@ export function ContractTable({ onOpenContract, onRequestNew }: ContractTablePro
 
     return matchesSearch && matchesStatus && matchesDept;
   });
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val);
-  };
 
   return (
     <div className="space-y-5">
@@ -181,7 +174,7 @@ export function ContractTable({ onOpenContract, onRequestNew }: ContractTablePro
                   </td>
                   <td className="py-3 px-3 text-[#6F6A61] font-mono">{contract.expiryDate}</td>
                   <td className="py-3 px-3 font-mono font-medium text-[#242321]">
-                    {formatCurrency(contract.value)}
+                    {formatContractValue(contract.value, contract.currency, contract.valueBasis)}
                   </td>
                   <td className="py-3 px-3 text-right">
                     <Button
@@ -219,7 +212,7 @@ export function ContractTable({ onOpenContract, onRequestNew }: ContractTablePro
 
               <div className="flex flex-wrap items-center justify-between text-xs text-[#6F6A61] pt-1">
                 <span>Ends: <strong className="text-[#242321] font-mono">{contract.expiryDate}</strong></span>
-                <span className="font-mono text-[#242321] font-medium">{formatCurrency(contract.value)}</span>
+                <span className="font-mono text-[#242321] font-medium">{formatContractValue(contract.value, contract.currency, contract.valueBasis)}</span>
               </div>
 
               <div className="pt-2 border-t border-[#DED6C8]/60 flex items-center justify-between">

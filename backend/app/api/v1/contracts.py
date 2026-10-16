@@ -102,8 +102,10 @@ def serialize_contract(c: Contract) -> ContractResponse:
         counterparty=c.counterparty,
         department=c.department,
         owner=c.owner,
-        value=float(c.value),
-        currency=c.currency,
+        value=float(c.value) if c.value is not None else None,
+        currency=c.currency or "INR",
+        value_basis=getattr(c, "value_basis", "NOT_SPECIFIED") or "NOT_SPECIFIED",
+        calculation_explanation=getattr(c, "calculation_explanation", None),
         start_date=c.start_date,
         expiry_date=c.expiry_date,
         end_date=c.expiry_date,
@@ -320,7 +322,7 @@ async def upload_contract(
     contract_type: str = Form("Master Services Agreement"),
     counterparty: str = Form(...),
     department: str = Form("Legal"),
-    value: float = Form(0.0),
+    value: Optional[float] = Form(None),
     currency: str = Form("INR"),
     start_date: Optional[str] = Form("2026-11-01"),
     expiry_date: Optional[str] = Form("2027-10-31"),
@@ -345,6 +347,7 @@ async def upload_contract(
     storage_client.save_file(storage_rel_path, content, tenant_id=tenant.id)
 
     # 2. Extract Document Text and Initialize Records
+    has_manual_val = (value is not None and value > 0)
     new_contract = Contract(
         organization_id=tenant.id,
         contract_id=contract_code,
@@ -353,8 +356,10 @@ async def upload_contract(
         counterparty=counterparty,
         department=department,
         owner=user.full_name,
-        value=value,
+        value=value if has_manual_val else None,
         currency=currency,
+        value_basis="MANUALLY_ENTERED" if has_manual_val else "NOT_SPECIFIED",
+        calculation_explanation=f"Manual contract value of {currency} {float(value):,.0f}" if has_manual_val else None,
         start_date=start_date,
         expiry_date=(end_date.strip() if (end_date and end_date.strip()) else expiry_date),
         renewal_date=(end_date.strip() if (end_date and end_date.strip()) else expiry_date),
@@ -692,6 +697,20 @@ async def submit_approval_decision(
     if not target_step:
         raise HTTPException(status_code=404, detail="Approval step not found on this contract.")
 
+    # Prevent submitting decisions on terminal contracts
+    if contract.status in ("TERMINATED", "CANCELLED", "EXPIRED"):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Cannot submit approval decision on a {contract.status.lower()} contract."
+        )
+
+    # Prevent repeated requests / deciding an already decided step
+    if target_step.decision != "PENDING":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Approval step {target_step.step_order} has already been decided ({target_step.decision})."
+        )
+
     # Enforce sequential order: previous step must be approved
     if target_idx > 0:
         prev_step = steps_sorted[target_idx - 1]
@@ -704,7 +723,6 @@ async def submit_approval_decision(
     target_step.decision = payload.decision
     target_step.decided_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M")
     target_step.comments = payload.comments or f"Decision submitted by {user.full_name}."
-    target_step.assigned_user = user.full_name
 
     audit_action = "APPROVAL_APPROVED" if payload.decision == "APPROVED" else "APPROVAL_REJECTED"
 

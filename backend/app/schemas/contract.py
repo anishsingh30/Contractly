@@ -94,8 +94,10 @@ class ContractResponse(BaseModel):
     counterparty: str
     department: str
     owner: str
-    value: float
-    currency: str
+    value: Optional[float] = None
+    currency: str = "INR"
+    value_basis: Optional[str] = "NOT_SPECIFIED"
+    calculation_explanation: Optional[str] = None
     start_date: Optional[str] = None
     expiry_date: Optional[str] = None
     end_date: Optional[str] = None

@@ -621,7 +621,9 @@ export function ContractlyProvider({ children }: { children: ReactNode }) {
       formData.append('contract_type', newContract.contractType || 'Master Services Agreement');
       formData.append('counterparty', newContract.counterparty || 'Counterparty Inc.');
       formData.append('department', newContract.department || 'Legal');
-      formData.append('value', String(newContract.value || 0));
+      if (newContract.value !== null && newContract.value !== undefined && !isNaN(newContract.value)) {
+        formData.append('value', String(newContract.value));
+      }
       formData.append('currency', newContract.currency || 'INR');
       formData.append('start_date', newContract.startDate || '2026-11-01');
       formData.append('expiry_date', newContract.expiryDate || '2027-10-31');

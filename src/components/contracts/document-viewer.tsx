@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useContractly } from '@/context/contractly-context';
 import { StatusPill } from '@/components/ui/status-pill';
 import { Button } from '@/components/ui/button';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
+import { formatContractValue } from '@/lib/currency-formatter';
 import {
   ClauseExplanation,
   ContractLifecycleSummary,
@@ -49,6 +50,12 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
   const [selectedClauseId, setSelectedClauseId] = useState<string>(
     activeContract?.clauses?.[0]?.id || ''
   );
+  const [highlightedClauseId, setHighlightedClauseId] = useState<string | null>(null);
+  const [filterFlaggedOnly, setFilterFlaggedOnly] = useState<boolean>(false);
+
+  const flaggedSectionRef = useRef<HTMLDivElement>(null);
+  const sectionsContainerRef = useRef<HTMLDivElement>(null);
+
   const [activeRightTab, setActiveRightTab] = useState<'intelligence' | 'understand' | 'lifecycle' | 'versions' | 'qa' | 'details'>(
     'intelligence'
   );
@@ -133,6 +140,28 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
     }
   }, [activeRightTab, activeContract?.id, activeContract?.status]);
 
+  const flaggedClauses = useMemo(() => {
+    if (!activeContract?.clauses) return [];
+    return activeContract.clauses.filter((c) => {
+      if (c.potentialConcern && c.potentialConcern.trim().length > 0) return true;
+      if (
+        activeContract.risks &&
+        activeContract.risks.some(
+          (r: any) =>
+            (r.clause_id && r.clause_id === c.id) ||
+            (r.clauseId && r.clauseId === c.id) ||
+            (r.section_number && r.section_number === c.sectionNumber) ||
+            (r.sectionNumber && r.sectionNumber === c.sectionNumber)
+        )
+      ) {
+        return true;
+      }
+      return false;
+    });
+  }, [activeContract]);
+
+  const potentialConcernsCount = flaggedClauses.length;
+
   if (!activeContract) {
     return (
       <div className="p-8 text-center text-[#6F6A61] bg-[#FCFAF5] border border-[#DED6C8] rounded-[2px] space-y-3">
@@ -148,10 +177,53 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
   const selectedClause: ClauseExplanation | undefined =
     activeContract.clauses.find((c) => c.id === selectedClauseId) || activeContract.clauses[0];
 
-  const potentialConcernsCount =
-    activeContract.risks && activeContract.risks.length > 0
-      ? activeContract.risks.length
-      : activeContract.clauses.filter((c) => c.potentialConcern).length;
+  const scrollToClauseInContainer = (clauseId: string) => {
+    const el = document.getElementById(`clause-${clauseId}`);
+    const container = sectionsContainerRef.current;
+    if (el && container) {
+      const containerRect = container.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const relativeTop = elRect.top - containerRect.top + container.scrollTop;
+      container.scrollTo({
+        top: Math.max(0, relativeTop - 16),
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const handleNavigateToFlaggedItems = () => {
+    if (potentialConcernsCount === 0 || flaggedClauses.length === 0) return;
+
+    // 1. Scroll the outer page to the Flagged Items section
+    if (flaggedSectionRef.current) {
+      flaggedSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // 2. Select and highlight the first flagged clause
+    const firstFlagged = flaggedClauses[0];
+    if (firstFlagged) {
+      setSelectedClauseId(firstFlagged.id);
+      setHighlightedClauseId(firstFlagged.id);
+      setTimeout(() => setHighlightedClauseId(null), 3000);
+
+      // 3. Scroll the nested scrollable contract sections container to this clause
+      setTimeout(() => {
+        scrollToClauseInContainer(firstFlagged.id);
+      }, 150);
+    }
+  };
+
+  const handleSelectFlaggedItem = (clauseId: string) => {
+    setSelectedClauseId(clauseId);
+    setHighlightedClauseId(clauseId);
+    setTimeout(() => setHighlightedClauseId(null), 3000);
+
+    // Scroll nested container to clause
+    scrollToClauseInContainer(clauseId);
+
+    // Also bring the clause details tab into view on the right
+    setActiveRightTab('understand');
+  };
 
   const handleAskQuestion = async (prefilled?: string) => {
     const q = prefilled || qaQuery;
@@ -329,7 +401,17 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
           <span className="text-[10px] uppercase font-mono tracking-wider text-[#3F4634] font-bold block mb-2">
             Important things to know
           </span>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs">
+            <div className="p-2.5 bg-[#F7F3EA] border border-[#DED6C8] rounded-[2px]">
+              <span className="text-[10px] text-[#6F6A61] block">Committed Value</span>
+              <strong className="text-[#242321] text-xs mt-0.5 block font-mono">
+                {formatContractValue(activeContract.value, activeContract.currency, activeContract.valueBasis)}
+              </strong>
+              <span className="text-[10px] text-[#6F6A61] truncate block" title={activeContract.calculationExplanation || undefined}>
+                {activeContract.calculationExplanation || (activeContract.valueBasis === 'NOT_SPECIFIED' ? 'Not specified' : 'Contract term basis')}
+              </span>
+            </div>
+
             <div className="p-2.5 bg-[#F7F3EA] border border-[#DED6C8] rounded-[2px]">
               <span className="text-[10px] text-[#6F6A61] block">Active Stage</span>
               <strong className="text-[#242321] text-xs mt-0.5 block">{activeContract.status}</strong>
@@ -348,8 +430,43 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
               <span className="text-[10px] text-[#6F6A61]">{activeContract.renewalNoticeDays || 30} days notice required</span>
             </div>
 
-            <div className="p-2.5 bg-[#F7EDED]/70 border border-[#E2BDBF] rounded-[2px]">
-              <span className="text-[10px] text-[#8B3F3F] block font-medium">Potential concerns</span>
+            <div
+              id="potential-concerns-card"
+              role={potentialConcernsCount > 0 ? 'button' : undefined}
+              tabIndex={potentialConcernsCount > 0 ? 0 : undefined}
+              onClick={potentialConcernsCount > 0 ? handleNavigateToFlaggedItems : undefined}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && potentialConcernsCount > 0) {
+                  e.preventDefault();
+                  handleNavigateToFlaggedItems();
+                }
+              }}
+              className={`p-2.5 bg-[#F7EDED]/70 border border-[#E2BDBF] rounded-[2px] transition-all select-none ${
+                potentialConcernsCount > 0
+                  ? 'cursor-pointer hover:bg-[#F7EDED] hover:border-[#8B3F3F] hover:shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8B3F3F]/50 focus:border-[#8B3F3F]'
+                  : 'cursor-default'
+              }`}
+              title={
+                potentialConcernsCount > 0
+                  ? `Click to navigate to all ${potentialConcernsCount} flagged clauses`
+                  : 'No potential concerns flagged'
+              }
+              aria-label={
+                potentialConcernsCount > 0
+                  ? `Potential concerns: ${potentialConcernsCount} ${
+                      potentialConcernsCount === 1 ? 'item' : 'items'
+                    } flagged. Click to view all flagged clauses.`
+                  : 'Potential concerns: 0 items flagged'
+              }
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-[#8B3F3F] block font-medium">Potential concerns</span>
+                {potentialConcernsCount > 0 && (
+                  <span className="text-[10px] text-[#8B3F3F] font-mono underline">
+                    View all ({potentialConcernsCount}) ↓
+                  </span>
+                )}
+              </div>
               <strong className="text-[#8B3F3F] text-xs mt-0.5 block">
                 {potentialConcernsCount} {potentialConcernsCount === 1 ? 'item' : 'items'} flagged
               </strong>
@@ -361,30 +478,157 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
         </div>
       </div>
 
+      {/* DEDICATED FLAGGED ITEMS SECTION */}
+      {potentialConcernsCount > 0 ? (
+        <div
+          id="flagged-items-section"
+          ref={flaggedSectionRef}
+          tabIndex={-1}
+          className="p-4 bg-[#FCFAF5] border border-[#E2BDBF] rounded-[2px] space-y-3 scroll-mt-6 focus:outline-none focus:ring-1 focus:ring-[#8B3F3F]/40"
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 border-b border-[#E2BDBF]">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#8B3F3F] inline-block" />
+              <h2 className="text-sm font-bold text-[#8B3F3F]">
+                Flagged Items ({potentialConcernsCount})
+              </h2>
+            </div>
+            <span className="text-[11px] text-[#6F6A61]">
+              {activeContract.riskLevel} Risk Profile · Click any flagged clause below to view and highlight its section in the agreement
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {flaggedClauses.map((clause) => {
+              const isSelected = clause.id === selectedClauseId;
+              const isHighlighted = clause.id === highlightedClauseId;
+              return (
+                <div
+                  key={clause.id}
+                  id={`flagged-summary-${clause.id}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleSelectFlaggedItem(clause.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleSelectFlaggedItem(clause.id);
+                    }
+                  }}
+                  className={`p-3 rounded-[2px] border cursor-pointer transition-all text-xs text-left ${
+                    isHighlighted || isSelected
+                      ? 'bg-[#F7EDED] border-[#8B3F3F] ring-1 ring-[#8B3F3F] shadow-sm'
+                      : 'bg-[#FCFAF5] border-[#E2BDBF] hover:bg-[#FDF6F6] hover:border-[#8B3F3F]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono text-xs font-bold text-[#242321] shrink-0">
+                        {clause.sectionNumber}
+                      </span>
+                      <span className="font-semibold text-[#242321] truncate">
+                        {clause.clauseTitle}
+                      </span>
+                    </div>
+                    <StatusPill status={clause.riskLevel} />
+                  </div>
+
+                  <p className="text-[11px] text-[#6F6A61] line-clamp-2 font-serif italic mb-2 leading-relaxed">
+                    &quot;{clause.originalText}&quot;
+                  </p>
+
+                  {clause.potentialConcern && (
+                    <div className="text-[11px] text-[#8B3F3F] bg-[#F7EDED]/90 border border-[#E2BDBF]/60 p-2 rounded-[2px] leading-relaxed">
+                      <span className="font-semibold block mb-0.5">Warning / Concern:</span>
+                      <span>{clause.potentialConcern}</span>
+                    </div>
+                  )}
+
+                  <div className="mt-2.5 flex items-center justify-between text-[11px]">
+                    <span className="text-[#3F4634] font-medium hover:underline">
+                      View in Contract Sections →
+                    </span>
+                    <span className="text-[#6F6A61] font-mono text-[10px]">
+                      {clause.category}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div
+          id="flagged-items-empty-state"
+          className="p-3 bg-[#FCFAF5] border border-[#DED6C8] rounded-[2px] flex items-center justify-between text-xs text-[#6F6A61]"
+        >
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#4F6B50]" />
+            <span className="font-semibold text-[#242321]">No Flagged Items</span>
+            <span>— All sections have standard or low concern ratings.</span>
+          </div>
+          <span className="text-[11px] text-[#4F6B50] font-medium">Standard Compliance</span>
+        </div>
+      )}
+
       {/* 3. Main Split View: Left Document Clauses, Right Insights & Operations */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[500px]">
         {/* Left Pane: Document Text & Clauses */}
         <div className="lg:col-span-7 bg-[#FCFAF5] border border-[#DED6C8] rounded-[2px] flex flex-col overflow-hidden">
-          <div className="p-3 bg-[#F7F3EA] border-b border-[#DED6C8] flex items-center justify-between">
-            <span className="text-xs font-semibold text-[#242321]">
-              Contract Sections ({activeContract.clauses.length} identified)
-            </span>
-            <span className="text-[11px] text-[#6F6A61]">
-              Click a section to inspect explanations
-            </span>
+          <div className="p-3 bg-[#F7F3EA] border-b border-[#DED6C8] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-[#242321]">
+                Contract Sections ({activeContract.clauses.length} identified)
+              </span>
+              {potentialConcernsCount > 0 && (
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#F7EDED] text-[#8B3F3F] border border-[#E2BDBF]">
+                  {potentialConcernsCount} flagged
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setFilterFlaggedOnly(false)}
+                className={`px-2 py-0.5 rounded-[2px] transition-colors ${
+                  !filterFlaggedOnly
+                    ? 'bg-[#3F4634] text-[#FCFAF5] font-medium'
+                    : 'text-[#6F6A61] hover:text-[#242321] hover:bg-[#EDE6D8]'
+                }`}
+              >
+                All ({activeContract.clauses.length})
+              </button>
+              {potentialConcernsCount > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setFilterFlaggedOnly(true)}
+                  className={`px-2 py-0.5 rounded-[2px] transition-colors ${
+                    filterFlaggedOnly
+                      ? 'bg-[#8B3F3F] text-[#FCFAF5] font-medium'
+                      : 'text-[#8B3F3F] hover:bg-[#F7EDED]'
+                  }`}
+                >
+                  Flagged Only ({potentialConcernsCount})
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="flex-1 p-4 overflow-y-auto space-y-3 max-h-[540px]">
-            {activeContract.clauses.map((clause) => {
+          <div ref={sectionsContainerRef} className="flex-1 p-4 overflow-y-auto space-y-3 max-h-[540px]">
+            {(filterFlaggedOnly ? flaggedClauses : activeContract.clauses).map((clause) => {
               const isSelected = clause.id === selectedClauseId;
-              const hasRisk = clause.riskLevel === 'HIGH' || clause.riskLevel === 'CRITICAL';
+              const isHighlighted = clause.id === highlightedClauseId;
+              const hasRisk = clause.riskLevel === 'HIGH' || clause.riskLevel === 'CRITICAL' || !!clause.potentialConcern;
               return (
                 <div
                   key={clause.id}
+                  id={`clause-${clause.id}`}
                   onClick={() => setSelectedClauseId(clause.id)}
                   className={`p-3.5 rounded-[2px] border cursor-pointer transition-all ${
                     isSelected
                       ? 'bg-[#F7F3EA] border-[#3F4634] shadow-sm'
+                      : isHighlighted
+                      ? 'bg-[#F7EDED] border-[#8B3F3F] ring-2 ring-[#8B3F3F] shadow-sm'
                       : hasRisk
                       ? 'bg-[#FCFAF5] border-[#E2BDBF] hover:bg-[#FDF6F6]'
                       : 'bg-[#FCFAF5] border-[#DED6C8] hover:bg-[#F7F3EA]/50'
@@ -407,9 +651,9 @@ export function DocumentViewer({ onBack, onOpenRedline, onOpenWatch }: DocumentV
                   </p>
 
                   {clause.potentialConcern && (
-                    <div className="mt-2 text-[11px] text-[#8B3F3F] bg-[#F7EDED] p-1.5 rounded-[2px] flex items-center gap-1.5">
-                      <span>⚠️</span>
-                      <span className="line-clamp-1">{clause.potentialConcern}</span>
+                    <div className="mt-2 text-[11px] text-[#8B3F3F] bg-[#F7EDED] border border-[#E2BDBF]/60 p-2 rounded-[2px] flex items-start gap-1.5 leading-relaxed">
+                      <span className="font-bold text-[10px] uppercase tracking-wider shrink-0 mt-0.5">Warning:</span>
+                      <span className="line-clamp-2">{clause.potentialConcern}</span>
                     </div>
                   )}
                 </div>

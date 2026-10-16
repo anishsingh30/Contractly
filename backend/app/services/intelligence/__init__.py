@@ -9,6 +9,7 @@ from app.services.intelligence.clause_extractor import extract_clauses, CLAUSE_C
 from app.services.intelligence.metadata_extractor import extract_parties, extract_candidate_dates
 from app.services.intelligence.obligation_detector import extract_obligation_candidates
 from app.services.intelligence.risk_detector import detect_contract_risks, compute_explainable_risk_score
+from app.services.intelligence.financial_extractor import extract_contract_financials
 from app.services.intelligence.pipeline import run_intelligence_pipeline
 
 __all__ = [
@@ -19,6 +20,7 @@ __all__ = [
     "CLAUSE_CATEGORIES",
     "extract_parties",
     "extract_candidate_dates",
+    "extract_contract_financials",
     "extract_obligation_candidates",
     "detect_contract_risks",
     "compute_explainable_risk_score",

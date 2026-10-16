@@ -5,6 +5,7 @@ import { useContractly } from '@/context/contractly-context';
 import { StatusPill } from '@/components/ui/status-pill';
 import { Button } from '@/components/ui/button';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
+import { formatContractValue } from '@/lib/currency-formatter';
 
 export function ApprovalFlow() {
   const { contracts, approveStep, rejectStep, businessRole, hasPermission } = useContractly();
@@ -37,7 +38,15 @@ export function ApprovalFlow() {
                   <span className="font-mono text-xs text-[#6F6A61]">({contract.contractId})</span>
                 </div>
                 <p className="text-xs text-[#6F6A61] mt-0.5">
-                  With: <strong className="text-[#242321]">{contract.counterparty}</strong> • Value: ₹{(contract.value / 100000).toFixed(1)} Lakhs
+                  With: <strong className="text-[#242321]">{contract.counterparty}</strong> • Value:{' '}
+                  <strong className="text-[#242321] font-mono">
+                    {formatContractValue(contract.value, contract.currency, contract.valueBasis)}
+                  </strong>
+                  {contract.calculationExplanation && (
+                    <span className="text-[11px] text-[#6F6A61] ml-2 italic">
+                      ({contract.calculationExplanation})
+                    </span>
+                  )}
                 </p>
               </div>
               <div className="flex items-center gap-2">

@@ -214,8 +214,10 @@ export interface ContractItem {
   counterparty: string;
   department: string;
   owner: string;
-  value: number;
+  value: number | null;
   currency: string;
+  valueBasis?: string;
+  calculationExplanation?: string;
   startDate: string;
   expiryDate: string;
   renewalDate: string;

@@ -64,7 +64,7 @@ export function RequestModal({ isOpen, onClose }: RequestModalProps) {
           contractType,
           counterparty: counterparty.trim() || 'Other Party',
           department,
-          value: parseFloat(value) || 0,
+          value: value.trim() ? parseFloat(value) : null,
           startDate,
           expiryDate,
           renewalDate: expiryDate,

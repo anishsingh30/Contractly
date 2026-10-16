@@ -7,6 +7,7 @@ import { StatusPill } from '@/components/ui/status-pill';
 import { Button } from '@/components/ui/button';
 import { HelpTooltip } from '@/components/ui/help-tooltip';
 import { useContractly } from '@/context/contractly-context';
+import { formatCurrency } from '@/lib/currency-formatter';
 
 export function VendorGrid() {
   const { addToast, hasPermission } = useContractly();
@@ -64,14 +65,6 @@ export function VendorGrid() {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const formatCurrency = (val: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      maximumFractionDigits: 0
-    }).format(val);
   };
 
   return (
